@@ -1,0 +1,47 @@
+The method for creating the transform of the inertia offset with respect to the mesh frame in the blender:
+Step 1)We find the transformation matrix of the joint frame in the blender model w.r.t the
+world frame.
+Step 2) We find the transformation matrix of the link(mesh) frame inside the blender w.r.t the
+world frame.
+Step 3) We receive the vector corresponding to the inertia offset that is defined w.r.t to the joint frame
+of the model inside the blender. This vector is the same as we see in the Jason file.(the DH frames of the models correspond to The
+joint frame in the blender).
+Step 4) We calculate the transformation of the inertia vector w.r.t to the mesh frame.
+So, now we need to construct those matrices or better to say, get those matrices using the built-in python console
+in the blender.
+The python console can be accessed in the right corner of the blender screen. by dragging the triangle icon up and
+choosing the python console from the options we write our commands and derive the transformation matrices using the
+python client inside the blender.
+** there is useful feature for auto-complete inside the python using the  ctrl+space that shows you the available
+options for the code.
+*************************************
+***python code:***
+
+def my_conversion(child_name, joint_name, P_j):
+   child_handle = bpy.data.objects[child_name] # getting the handle for the desired link frame(mesh frame)
+   joint_handle = bpy.data.objects[joint_name] # getting the handle for the desired joint frame( same as the DH frame assignment)
+   T_w_c = child_handle.matrix_world.copy()# finding the transformation mtx of the link frame w.r.t world frame
+   T_w_j = joint_handle.matrix_world.copy()# finding the transformation mtx of the joint frame w.r.t world frame
+   T_c_w = T_w_c.copy() # creating a copy of the transformation mtx of the link frame
+   T_c_w.invert()bpbpyfasd# getting the inverse of the copy of the T_w_c matrix
+   P_c = T_c_w * T_w_j * P_j # calculating the inertia offset w.r.t the world frame
+   return P_c
+*****
+>>> def my_conversion(parent, child):
+...     parent=bpy.data.objects[parent]
+...     child=bpy.data.objects[child]
+...     T_w_p=parent.matrix_world.copy()
+...     T_w_c=child.matrix_world.copy()
+...     T_p_w=T_w_p.copy()
+...     T_p_w.invert()
+...     T_p_c=T_p_w*T_w_c
+...     return T_p_c
+
+Blender shortcuts:
+
+1) ctrl+shift+c for moving the mesh inside the collision mesh
+2) shift+h for selecting bodies and hiding them so that the bodies won't write on the yaml
+3) alt+h for bringing back the hidden bodies
+4) G for translation
+5) R for rotation
+6) Tab for selecting between the edit mode and the object mode
